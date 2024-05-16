@@ -8,9 +8,8 @@ import javafx.stage.Stage;
 
 public class TodoScene {
     private LoginService loginService = new LoginService();
-    private LoginScene loginScene;
-    public Scene createScene(Stage stage, LoginScene loginScene) {
-        this.loginScene = loginScene;
+
+    public Scene createScene() {
         GridPane todoPane = new GridPane();
         todoPane.setAlignment(Pos.CENTER);
         todoPane.setHgap(10);
@@ -18,10 +17,12 @@ public class TodoScene {
 
         Button signOutButton = new Button("Kijelentkezés");
         signOutButton.setOnAction(event -> {
-            String username = loginScene.getLoggedInUsername();
-            String password = loginScene.getLoggedInPassword();
+            String username = Page.loginScene.getLoggedInUsername();
+            String password = Page.loginScene.getLoggedInPassword();
             loginService.sendLogoutMessage(username, password);
-            stage.setScene(loginScene.createScene());
+            Scene todoScene = Page.loginScene.createScene();
+            Stage stage = (Stage) todoPane.getScene().getWindow();
+            stage.setScene(todoScene);
         });
 
         todoPane.add(signOutButton, 0, 0);

@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 public class Page extends Application {
     public static LoginScene loginScene = new LoginScene();
+    public static TodoScene todoScene = new TodoScene();
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Login");

@@ -5,6 +5,7 @@ import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -18,8 +19,10 @@ public class LoginScene{
     private String loggedInPassword;
     LoginService loginService = new LoginService();
 
+
     public Scene createScene() {
         //main pane
+
         GridPane mainPane = new GridPane();
         mainPane.setAlignment(Pos.CENTER);
         mainPane.setHgap(10);
@@ -59,7 +62,10 @@ public class LoginScene{
                 } else {
                     loggedInUsername = username;
                     loggedInPassword = password;
-                    //stage.setScene(todoScene);
+                    System.out.println("Login successful");
+                    Scene todoScene = Page.todoScene.createScene();
+                    Stage stage = (Stage) mainPane.getScene().getWindow();
+                    stage.setScene(todoScene);
                 }
             });
 
