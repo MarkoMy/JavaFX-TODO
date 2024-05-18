@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Server {
-    private List<User> users;
+    public List<User> users;
     private List<Task> tasks;
     private List<Group> groups;
     private FileHandler fileHandler;
@@ -52,7 +52,7 @@ public class Server {
             } else if (parts.length >= 3 && parts[0].equals("login")) {
                 loginUser(parts[1], parts[2], clientSocket);
             }else if(parts.length >= 3 && parts[0].equals("register")){
-                registerUser(parts[1], parts[2]);
+                registerUser(parts[1], parts[2], clientSocket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -63,16 +63,17 @@ public class Server {
         // send task list to user
     }
 
-    public void registerUser(String username, String password) {
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setPassword(password);
-        users.add(newUser);
-        fileHandler.writeToFile("logins.txt", users);
+    public void registerUser(String username, String password, Socket clientSocket) throws IOException {
+        String s = fileHandler.writeToFile("logins.txt", users, username, password);
+        if(s.equals("User registered")){
+            sendClientMessage("Registration successful", clientSocket);
+        }else{
+            sendClientMessage("Registration failed", clientSocket);
+        }
     }
 
     public void loginUser(String username, String password, Socket clientSocket) {
-        List<User> fileUsers = fileHandler.readFromFile("logins.txt");
+        List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
         for (User user : fileUsers) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 loggedInUsers.add(username);

@@ -1,8 +1,14 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
     private String username;
     private String password;
+    private List<Task> tasks;
 
-    // getters and setters
+    public User() {
+        this.tasks = new ArrayList<>();
+    }
     public String getUsername() {
         return username;
     }
@@ -19,9 +25,14 @@ public class User {
         this.password = password;
     }
 
-    // toString
-
     public String toString() {
         return "User [username=" + username + ", password=" + password + "]";
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 }

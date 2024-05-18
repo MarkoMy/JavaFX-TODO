@@ -1,10 +1,14 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Group {
     private String name;
     private List<User> users;
+    private List<Task> tasks;
 
-    // getters and setters
+    public Group() {
+        this.tasks = new ArrayList<>();
+    }
 
     public String getName() {
         return name;
@@ -20,5 +24,9 @@ public class Group {
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
     }
 }

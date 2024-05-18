@@ -37,6 +37,59 @@ public class LoginScene{
 
         Button loginButton = new Button("Bejelentkezés");
 
+        Button registerButton = new Button("Regisztráció");
+
+        registerButton.setOnAction(event -> {
+            String username = usernameField.getText();
+            String password = passwordField.getText();
+
+            //if emtpy than throw error
+            if(username.isEmpty() || password.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Regisztráció");
+                alert.setHeaderText(null);
+                alert.setContentText("A felhasználónév és jelszó mezők nem lehetnek üresek!");
+                alert.showAndWait();
+            } else {
+                Task<String> registerTask = new Task<>() {
+                    @Override
+                    protected String call() throws Exception {
+                        System.out.println("Sending register data");
+                        return loginService.sendRegisterData(username, password);
+                    }
+                };
+
+                registerTask.setOnSucceeded(workerStateEvent -> {
+                    String response = registerTask.getValue();
+                    System.out.println("Valasz: " + response);
+                    if (response == null || response.equals("Registration failed")) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Regisztráció");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Regisztráció sikertelen. Kérem ellenőrizze a felhasználónevet és jelszót.");
+                        alert.showAndWait();
+                    } else if(response.equals("Registration successful")) {
+                        loggedInUsername = username;
+                        loggedInPassword = password;
+                        System.out.println("Regisztráció sikeres");
+                        Scene todoScene = Page.todoScene.createScene();
+                        Stage stage = (Stage) mainPane.getScene().getWindow();
+                        stage.setScene(todoScene);
+                    }
+                });
+
+                registerTask.setOnFailed(workerStateEvent -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Regisztráció");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Hiba történt a regisztráció során.");
+                    alert.showAndWait();
+                });
+
+                new Thread(registerTask).start();
+            }
+        });
+
         // Set button actions
         loginButton.setOnAction(event -> {
             String username = usernameField.getText();
@@ -84,15 +137,18 @@ public class LoginScene{
         mainPane.add(usernameField, 0, 0);
         mainPane.add(passwordField, 0, 1);
         mainPane.add(loginButton, 0, 2);
+        mainPane.add(registerButton, 0, 3);
 
         // Set alignment to center
         GridPane.setHalignment(usernameField, HPos.CENTER);
         GridPane.setHalignment(passwordField, HPos.CENTER);
         GridPane.setHalignment(loginButton, HPos.CENTER);
+        GridPane.setHalignment(registerButton, HPos.CENTER);
 
         GridPane.setValignment(usernameField, VPos.CENTER);
         GridPane.setValignment(passwordField, VPos.CENTER);
         GridPane.setValignment(loginButton, VPos.CENTER);
+        GridPane.setValignment(registerButton, VPos.CENTER);
 
 
         Scene scene = new Scene(mainPane, 450, 800);
