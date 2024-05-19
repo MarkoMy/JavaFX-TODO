@@ -14,10 +14,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.net.Socket;
+
 public class LoginScene{
     private String loggedInUsername;
     private String loggedInPassword;
-    LoginService loginService = new LoginService();
+    Service loginService = new Service();
 
 
     public Scene createScene() {
@@ -116,9 +118,11 @@ public class LoginScene{
                     loggedInUsername = username;
                     loggedInPassword = password;
                     System.out.println("Login successful");
+                    loginService.getTasks();
                     Scene todoScene = Page.todoScene.createScene();
                     Stage stage = (Stage) mainPane.getScene().getWindow();
                     stage.setScene(todoScene);
+
                 }
             });
 

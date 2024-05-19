@@ -9,7 +9,7 @@ public class Page extends Application {
     public static TodoScene todoScene = new TodoScene();
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Login");
+        primaryStage.setTitle("Epic ToDo");
         primaryStage.setWidth(450);
         primaryStage.setHeight(800);
 
