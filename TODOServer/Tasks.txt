@@ -1,25 +1,5 @@
 ---Group:IT
 |
-title=teszttask
-description=solvinak
-creationdate=2024-05-19T16:00
-deadline=2024-06-05T16:00
-status=nincs kész
-priority=SÜRGŐS
-author=Mark
-group=IT
-members=Maja
-|
-title=t1
-description=t1
-creationdate=2024-05-19T16:00
-deadline=2024-05-20T16:00
-status=jó
-priority=jó
-author=Mark
-group=IT
-members=Maja
-|
 title=tesztcím
 description=tesztleírás
 creationdate=2019-01-01T12:00:00
@@ -40,16 +20,6 @@ author=Maja
 group=IT
 members=Maja-OWNER,Mark-EDITOR,Scolwerz-WORKER
 ---Group:HR
-|
-title=t2+
-description=t2
-creationdate=2024-05-19T16:00
-deadline=2024-05-20T16:00
-status=igen
-priority=igen
-author=Mark
-group=HR
-members=Scolwerz
 |
 title=HR gyülekezet
 description=HR meeting!

@@ -137,18 +137,15 @@ public class Server {
 
     public void sendTaskList(Socket clientSocket, String username) {
         System.out.printf("Sending task list to user %s%n", username);
-        // send task list to user which contains the username
         List<Task> userTasks = new ArrayList<>();
         for (Task task : tasks) {
-            //System.out.println(task.getAuthor().getUsername() + " " + task.getAssignedUsers());
-            if (task.getAuthor().getUsername().equals(username) || isUserAssigned(task, username)) {
+            if (task.getAuthor() != null && task.getAuthor().getUsername().equals(username) || isUserAssigned(task, username)) {
                 System.out.printf("\nAdding task %s to user %s%n", task.getTitle(), username);
                 userTasks.add(task);
             }
         }
         try {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            //if its empty
             if (userTasks.isEmpty()) {
                 System.out.println("No tasks found for user " + username);
                 out.println("end");
@@ -156,12 +153,23 @@ public class Server {
             }
             for (Task task : userTasks) {
                 StringJoiner joiner = new StringJoiner("|");
-                joiner.add(task.getTitle())
-                        .add(task.getDescription())
-                        .add(task.getCreationDate().toString())
-                        .add(task.getDeadline().toString())
-                        .add(task.getPriority())
-                        .add(task.getStatus());
+                joiner.add("title=" + task.getTitle())
+                        .add("description=" + task.getDescription())
+                        .add("creationdate=" + task.getCreationDate().toString())
+                        .add("deadline=" + task.getDeadline().toString())
+                        .add("priority=" + task.getPriority())
+                        .add("status=" + task.getStatus())
+                        .add("author=" + (task.getAuthor() != null ? task.getAuthor().getUsername() : "null"))
+                        .add("group=" + task.getGroup().getName());
+                StringBuilder members = new StringBuilder("members=");
+                for (int i = 0; i < task.getAssignedUsers().size(); i++) {
+                    User user = task.getAssignedUsers().get(i);
+                    members.append(user.getUsername());
+                    if (i < task.getAssignedUsers().size() - 1) {
+                        members.append(",");
+                    }
+                }
+                joiner.add(members.toString());
                 out.println(joiner.toString());
             }
             out.println("end");
@@ -194,7 +202,6 @@ public class Server {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 loggedInUsers.add(username);
                 sendClientMessage("Login successful", clientSocket);
-                //sendTaskList(clientSocket, username);
                 return;
             }
         }

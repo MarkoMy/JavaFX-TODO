@@ -284,9 +284,11 @@ private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
         Label deadlineLabel = new Label("Deadline: " + task.getDeadline());
         Label priorityLabel = new Label("Priority: " + task.getPriority());
         Label statusLabel = new Label("Status: " + task.getStatus());
+        Label groupLabel = new Label("Group: " + task.getGroup());
+        Label membersLabel = new Label("Members: " + task.getMembers());
         Button backButton = new Button("Vissza");
         backButton.setOnAction(event -> displayTasks(tasks, todomainPane));
-        taskDetails.getChildren().addAll(titleLabel, authorLabel, descriptionLabel, deadlineLabel, priorityLabel, statusLabel, backButton);
+        taskDetails.getChildren().addAll(titleLabel, authorLabel, descriptionLabel, deadlineLabel, priorityLabel, statusLabel, groupLabel, membersLabel, backButton);
         todomainPane.setCenter(taskDetails);
     }
 }

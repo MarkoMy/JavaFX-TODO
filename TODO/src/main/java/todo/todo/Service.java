@@ -79,24 +79,55 @@ public class Service {
         Service();
         List<Task> tasks = new ArrayList<>();
         try {
-            String getTasksMessage = "gettasks|"+ username;
+            String getTasksMessage = "gettasks|" + username;
             System.out.println(getTasksMessage);
             out.println(getTasksMessage);
             String response;
             System.out.println("Getting tasks from server");
+            //title=tesztcím|description=tesztleírás|creationdate=2019-01-01T12:00:00|deadline=2019-01-02T12:00:00
+            // |status=incomplete|priority=high|author=Mark|group=IT|members=Mark-OWNER,Scolwerz-WORKER
+
             while (!(response = in.readLine()).equals("end")) {
                 System.out.printf("Server response: %s\n", response);
                 String[] parts = response.split("\\|");
-                String title = parts[0];
-                String description = parts[1];
-                String creationDate = parts[2];
-                String deadline = parts[3];
-                String priority = parts[4];
-                String status = parts[5];
-                Task task = new Task(title, description, creationDate, deadline, priority, status);
+                String title = null, description = null, creationDate = null, deadline = null,
+                        priority = null, status = null, author = null, group = null, members = null;
+                for (String part : parts) {
+                    String[] keyValue = part.split("=");
+                    switch (keyValue[0]) {
+                        case "title":
+                            title = keyValue[1];
+                            break;
+                        case "description":
+                            description = keyValue[1];
+                            break;
+                        case "creationdate":
+                            creationDate = keyValue[1];
+                            break;
+                        case "deadline":
+                            deadline = keyValue[1];
+                            break;
+                        case "priority":
+                            priority = keyValue[1];
+                            break;
+                        case "status":
+                            status = keyValue[1];
+                            break;
+                        case "author":
+                            author = keyValue[1];
+                            break;
+                        case "group":
+                            group = keyValue[1];
+                            break;
+                        case "members":
+                            members = keyValue[1];
+                            break;
+                    }
+                }
+                Task task = new Task(title, author, description, creationDate, deadline, priority, status, group, members);
                 tasks.add(task);
             }
-            if(response.equals("end")){
+            if (response.equals("end")) {
                 System.out.println("End of tasks");
             }
         } catch (IOException e) {
