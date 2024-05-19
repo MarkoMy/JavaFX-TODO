@@ -70,12 +70,49 @@ public class Server {
                     System.out.println("New group command received");
                     newGroup(parts[1], parts[2]);
                     break;
+                case "getusernames":
+                    sendusernames(clientSocket);
+                    break;
+                case "getgroups":
+                    sendgroups(clientSocket);
+                    break;
                 default:
                     // Handle unknown command
                     break;
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void sendgroups(Socket clientSocket) {
+        try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            if(groups.isEmpty()){
+                writer.println("No groups found");
+                return;
+            }else{
+                for (Group group : groups) {
+                    System.out.printf("Sending group %s to client%n", group.getName());
+                    writer.println(group.getName());
+                }
+            }
+            writer.println("end");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sendusernames(Socket clientSocket) {
+        users.clear(); // Clear the users list before reading from the file
+        List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
+        try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            for (User user : fileUsers) {
+                writer.println(user.getUsername());
+                System.out.printf("Sending username %s to client%n", user.getUsername());
+            }
+            writer.println("end");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -194,11 +231,7 @@ public class Server {
             return;
         }
 
-        User assignedUser = findUserByName(people);
-        if (assignedUser == null) {
-            System.out.println("Assigned user does not exist");
-            return;
-        }
+
 
         Task task = new Task();
         task.setTitle(title);
@@ -209,7 +242,21 @@ public class Server {
         task.setStatus(status);
         task.setAuthor(aauthor);
         task.setGroup(groupName);
-        task.getAssignedUsers().add(assignedUser);
+
+        String[] userWithRoles = people.split(",");
+        List<User> assignedUsers = new ArrayList<>();
+        for (String userWithRole : userWithRoles) {
+            String[] parts = userWithRole.split("-");
+            String username = parts[0];
+
+            User assignedUser = findUserByName(username);
+            if (assignedUser == null) {
+                System.out.println("Assigned user " + username + " does not exist");
+                continue;
+            }
+            assignedUsers.add(assignedUser);
+        }
+        task.setAssignedUsers(assignedUsers);
 
         tasks.add(task);
         groupName.getTasks().add(task);

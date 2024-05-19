@@ -1,5 +1,15 @@
 ---Group:IT
 |
+title=teszttask
+description=solvinak
+creationdate=2024-05-19T16:00
+deadline=2024-06-05T16:00
+status=nincs kész
+priority=SÜRGŐS
+author=Mark
+group=IT
+members=Maja
+|
 title=t1
 description=t1
 creationdate=2024-05-19T16:00
@@ -31,7 +41,7 @@ group=IT
 members=Maja-OWNER,Mark-EDITOR,Scolwerz-WORKER
 ---Group:HR
 |
-title=t2
+title=t2+
 description=t2
 creationdate=2024-05-19T16:00
 deadline=2024-05-20T16:00
@@ -61,3 +71,5 @@ priority=high
 author=Mark
 group=Ghost Busters
 members=Mark-OWNER,Maja-EDITOR,Scolwerz-WORKER,a-EDITOR
+---Group:Legjobbak
+|

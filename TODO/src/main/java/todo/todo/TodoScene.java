@@ -9,6 +9,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +55,7 @@ public class TodoScene {
         BorderPane.setAlignment(newGroupButton, Pos.BOTTOM_LEFT);
         BorderPane.setMargin(newGroupButton, new Insets(0, 10, 10, 0));
 
-        Button plusButton = new Button("+");
+        Button plusButton = new Button("Új task");
         bottomButtons.getChildren().add(plusButton);
         plusButton.getStyleClass().add("abutton");
         BorderPane.setAlignment(plusButton, Pos.BOTTOM_RIGHT);
@@ -128,13 +131,55 @@ public class TodoScene {
             TextField priorityField = new TextField();
             Label statusLabel = new Label("Státusz:");
             TextField statusField = new TextField();
+
             Label groupLabel = new Label("Csoport:");
-            TextField groupField = new TextField();
+            ComboBox<String> groupField = new ComboBox<>();
+            List<String> groupNames = service.getGroupNames();
+            groupField.getItems().addAll(groupNames);
+
             Label peopleLabel = new Label("Személyek hozzáadása:");
             ComboBox<String> peopleComboBox = new ComboBox<>();
-            peopleComboBox.getItems().addAll("Maja", "Márk", "a", "Scolwerz");
+            // Get the usernames from the server
+            List<String> usernames = service.getUsernames();
+            // Add the usernames to the ComboBox
+            peopleComboBox.getItems().addAll(usernames);
+            Label roleLabel = new Label("Role:");
+            ComboBox<String> roleComboBox = new ComboBox<>();
+            roleComboBox.getItems().addAll("TAG", "EDITOR", "WORKER", "ADMIN", "OWNER");
+            Button addButton = new Button("Add");
             Button sendButton = new Button("Mentés");
             Button visszaButton = new Button("Vissza");
+
+            List<String> peopleRoleList = new ArrayList<>();
+            ComboBox<String> peopleRoleComboBox = new ComboBox<>();
+            Button deleteButton = new Button("Delete");
+
+            addButton.setOnAction(event1 -> {
+                String selectedPerson = peopleComboBox.getValue();
+                String selectedRole = roleComboBox.getValue();
+                if (selectedPerson != null && selectedRole != null) {
+                    // Check if the person is already in the list
+                    boolean personExists = peopleRoleList.stream().anyMatch(pr -> pr.startsWith(selectedPerson + "-"));
+                    if (!personExists) {
+                        peopleRoleList.add(selectedPerson + "-" + selectedRole);
+                        peopleRoleComboBox.getItems().add(selectedPerson + "-" + selectedRole);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Hiba");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Egy személyhez csak egy szerepkör rendelhető!");
+                        alert.showAndWait();
+                    }
+                }
+            });
+
+            deleteButton.setOnAction(event1 -> {
+                String selectedPersonRole = peopleRoleComboBox.getValue();
+                if (selectedPersonRole != null) {
+                    peopleRoleList.remove(selectedPersonRole);
+                    peopleRoleComboBox.getItems().remove(selectedPersonRole);
+                }
+            });
 
             // Create layout and add fields
             GridPane grid = new GridPane();
@@ -143,19 +188,24 @@ public class TodoScene {
             grid.add(titleField, 2, 1);
             grid.add(descriptionLabel, 1, 2);
             grid.add(descriptionField, 2, 2);
-            grid.add(deadlineLabel, 1, 4);
-            grid.add(deadlineDatePicker, 2, 4);
-            grid.add(timeField, 3, 4);
-            grid.add(priorityLabel, 1, 5);
-            grid.add(priorityField, 2, 5);
-            grid.add(statusLabel, 1, 6);
-            grid.add(statusField, 2, 6);
-            grid.add(groupLabel, 1, 7);
-            grid.add(groupField, 2, 7);
-            grid.add(peopleLabel, 1, 8);
-            grid.add(peopleComboBox, 2, 8);
-            grid.add(sendButton, 2, 9);
-            grid.add(visszaButton, 2, 10);
+            grid.add(deadlineLabel, 1, 3);
+            grid.add(deadlineDatePicker, 2, 3);
+            grid.add(timeField, 3, 3);
+            grid.add(priorityLabel, 1, 4);
+            grid.add(priorityField, 2, 4);
+            grid.add(statusLabel, 1, 5);
+            grid.add(statusField, 2, 5);
+            grid.add(groupLabel, 1, 6);
+            grid.add(groupField, 2, 6);
+            grid.add(peopleLabel, 1, 7);
+            grid.add(peopleComboBox, 2, 7);
+            grid.add(roleLabel, 1, 8);
+            grid.add(roleComboBox, 2, 8);
+            grid.add(addButton, 3, 8);
+            grid.add(peopleRoleComboBox, 2, 9);
+            grid.add(deleteButton, 3, 9);
+            grid.add(sendButton, 2, 10);
+            grid.add(visszaButton, 2, 11);
 
             visszaButton.setOnAction(event1 -> {
                 grid.getChildren().clear();
@@ -173,8 +223,9 @@ public class TodoScene {
                 String deadline = deadlineDatePicker.getValue().toString() + "T" + timeField.getText() + ":00";
                 String priority = priorityField.getText();
                 String status = statusField.getText();
-                String group = groupField.getText();
-                String people = peopleComboBox.getValue();
+                String group = groupField.getValue();
+                peopleRoleList.add(username + "-OWNER");
+                String people = String.join(",", peopleRoleList);
 
                 //if empty than throw error
                 if (title.isEmpty() || description.isEmpty() || creationDate.isEmpty() || deadline.isEmpty() || priority.isEmpty() || status.isEmpty() || group.isEmpty() || people.isEmpty()) {
@@ -191,7 +242,6 @@ public class TodoScene {
                     // Show the bottom buttons again
                     bottomButtons.setVisible(true);
                     System.out.println("Task sent");
-
                 }
             });
     // Add grid to the main pane

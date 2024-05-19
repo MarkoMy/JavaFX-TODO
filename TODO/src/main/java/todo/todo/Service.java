@@ -122,4 +122,42 @@ public class Service {
             System.out.println("Error when closing the socket: " + e.getMessage());
         }
     }
+
+    public List<String> getUsernames() {
+        List<String> usernames = new ArrayList<>();
+        try {
+            Service();
+            out.println("getusernames");
+
+            String response;
+            while (!(response = in.readLine()).equals("end")) {
+                usernames.add(response);
+                System.out.println(response);
+            }
+        } catch (IOException e) {
+            System.out.println("Server connection error: " + e.getMessage());
+        } finally {
+            close();
+        }
+        return usernames;
+    }
+
+    public List<String> getGroupNames() {
+        List<String> groupNames = new ArrayList<>();
+        try {
+            Service();
+            out.println("getgroups");
+
+            String response;
+            while (!(response = in.readLine()).equals("end")) {
+                groupNames.add(response);
+                System.out.println(response);
+            }
+        } catch (IOException e) {
+            System.out.println("Server connection error: " + e.getMessage());
+        } finally {
+            close();
+        }
+        return groupNames;
+    }
 }
