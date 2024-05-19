@@ -4,6 +4,10 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * This class is the main entry point of the application.
+ * It initializes the login and todo scenes and sets the initial scene.
+ */
 public class Page extends Application {
     public static LoginScene loginScene = new LoginScene();
     public static TodoScene todoScene = new TodoScene();

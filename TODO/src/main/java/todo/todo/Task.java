@@ -1,4 +1,7 @@
 package todo.todo;
+/**
+ * This class represents a Task in the application.
+ */
 public class Task {
     private String title;
     private String author;
@@ -10,6 +13,19 @@ public class Task {
     private String group;
     private String members;
 
+    /**
+     * Constructs a new Task with the given parameters.
+     *
+     * @param title the title of the task.
+     * @param author the author of the task.
+     * @param description the description of the task.
+     * @param creationDate the creation date of the task.
+     * @param deadline the deadline of the task.
+     * @param priority the priority of the task.
+     * @param status the status of the task.
+     * @param group the group of the task.
+     * @param members the members of the task.
+     */
     public Task(String title, String author, String description,String creationDate, String deadline,
                 String priority, String status, String group, String members) {
         this.title = title;

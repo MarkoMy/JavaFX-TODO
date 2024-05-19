@@ -8,6 +8,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class provides the service layer for the application.
+ * It handles the communication with the server.
+ */
 public class Service {
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 8080;
@@ -15,6 +19,9 @@ public class Service {
     private PrintWriter out;
     private BufferedReader in;
 
+    /**
+     * This method initializes the socket, output stream and input stream.
+     */
     public void Service() {
         try {
             socket = new Socket(SERVER_IP, SERVER_PORT);
@@ -25,6 +32,12 @@ public class Service {
         }
     }
 
+    /**
+     * This method sends login data to the server.
+     * @param username the username of the user.
+     * @param password the password of the user.
+     * @return the response from the server.
+     */
     public String sendLoginData(String username, String password) {
         try{
             Service();
@@ -41,6 +54,11 @@ public class Service {
             return null;
         }
     }
+    /**
+     * This method sends logout message to the server.
+     * @param username the username of the user.
+     * @param password the password of the user.
+     */
     public void sendLogoutMessage(String username, String password) {
         Service();
         String logoutMessage = "logout|" + username + "|" + password;
@@ -48,6 +66,12 @@ public class Service {
         close();
     }
 
+    /**
+     * This method sends register data to the server.
+     * @param username the username of the user.
+     * @param password the password of the user.
+     * @return the response from the server.
+     */
     public String sendRegisterData(String username, String password) {
         try{
             Service();
@@ -65,7 +89,18 @@ public class Service {
         }
     }
 
-    //username, title, description, creationDate, deadline, priority, status, group, people
+    /**
+     * This method sends task message to the server.
+     * @param username the username of the user.
+     * @param title the title of the task.
+     * @param description the description of the task.
+     * @param creationDate the creation date of the task.
+     * @param deadline the deadline of the task.
+     * @param priority the priority of the task.
+     * @param status the status of the task.
+     * @param group the group of the task.
+     * @param people the people involved in the task.
+     */
     public void sendTaskMessage(String username, String title, String description,String creationDate, String deadline, String priority, String status, String group, String people) {
         //send task message to server
         Service();
@@ -75,6 +110,11 @@ public class Service {
         out.flush();
     }
 
+    /**
+     * This method gets the tasks of a user from the server.
+     * @param username the username of the user.
+     * @return the list of tasks.
+     */
     public List<Task> getTasks(String username) {
         Service();
         List<Task> tasks = new ArrayList<>();
@@ -136,6 +176,11 @@ public class Service {
         return tasks;
     }
 
+    /**
+     * This method sends a new group message to the server.
+     * @param username the username of the user.
+     * @param group the name of the group.
+     */
     public void newGroup(String username, String group) {
         Service();
         //send group message to server
@@ -144,6 +189,9 @@ public class Service {
         out.flush();
     }
 
+    /**
+     * This method closes the socket, output stream and input stream.
+     */
     public void close() {
         try {
             out.close();
@@ -154,6 +202,10 @@ public class Service {
         }
     }
 
+    /**
+     * This method gets the usernames from the server.
+     * @return the list of usernames.
+     */
     public List<String> getUsernames() {
         List<String> usernames = new ArrayList<>();
         try {
@@ -173,6 +225,10 @@ public class Service {
         return usernames;
     }
 
+    /**
+     * This method gets the group names from the server.
+     * @return the list of group names.
+     */
     public List<String> getGroupNames() {
         List<String> groupNames = new ArrayList<>();
         try {
@@ -192,6 +248,10 @@ public class Service {
         return groupNames;
     }
 
+    /**
+     * This method sends a delete task message to the server.
+     * @param title the title of the task to delete.
+     */
     public void deleteTask(String title) {
         //sent delete message to server
         try {

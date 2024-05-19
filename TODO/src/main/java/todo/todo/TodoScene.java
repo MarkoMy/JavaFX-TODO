@@ -23,6 +23,10 @@ public class TodoScene {
     private Service service = new Service();
     List<Task> tasks;
 
+    /**
+     * This method creates the main scene of the application.
+     * @return the created scene.
+     */
     public Scene createScene() {
         BorderPane todomainPane = new BorderPane();
         todomainPane.setPadding(new Insets(10));
@@ -262,6 +266,11 @@ public class TodoScene {
 
         return scene;
     }
+    /**
+     * This method displays the tasks in the main pane.
+     * @param tasks the list of tasks to display.
+     * @param todomainPane the main pane where tasks are displayed.
+     */
 private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
     VBox taskList = new VBox();
     if (tasks.isEmpty()) {
@@ -276,6 +285,11 @@ private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
     }
     todomainPane.setCenter(taskList);
 }
+    /**
+     * This method shows the details of a task.
+     * @param task the task to show details of.
+     * @param todomainPane the main pane where task details are displayed.
+     */
     private void showDetails(Task task, BorderPane todomainPane) {
         VBox taskDetails = new VBox();
         Label titleLabel = new Label("Title: " + task.getTitle());

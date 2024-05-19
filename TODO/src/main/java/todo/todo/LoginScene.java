@@ -17,11 +17,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This class represents the login scene of the application.
+ * It handles user login and registration.
+ */
 public class LoginScene{
     public static String loggedInUsername;
     private String loggedInPassword;
     Service loginService = new Service();
 
+    /**
+     * This method creates the login scene.
+     * @return the created scene.
+     */
     public Scene createScene() {
         //main pane
 
