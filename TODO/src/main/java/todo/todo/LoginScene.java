@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LoginScene{
     public static String loggedInUsername;
@@ -37,8 +38,10 @@ public class LoginScene{
         passwordField.setPromptText("Jelszó");
 
         Button loginButton = new Button("Bejelentkezés");
+        loginButton.getStyleClass().add("abutton");
 
         Button registerButton = new Button("Regisztráció");
+        registerButton.getStyleClass().add("abutton");
 
         registerButton.setOnAction(event -> {
             String username = usernameField.getText();
@@ -117,6 +120,7 @@ public class LoginScene{
                     loggedInUsername = username;
                     loggedInPassword = password;
                     System.out.println("Login successful");
+
                     Scene todoScene = Page.todoScene.createScene();
                     Stage stage = (Stage) mainPane.getScene().getWindow();
                     stage.setScene(todoScene);
@@ -153,7 +157,7 @@ public class LoginScene{
 
 
         Scene scene = new Scene(mainPane, 450, 800);
-        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
         return scene;
     }
 

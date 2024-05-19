@@ -8,6 +8,7 @@ public class TaskPane extends VBox {
 
     public TaskPane(Task task) {
         this.task = task;
+        //this.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         Label titleLabel = new Label(task.getTitle());
         Label authorLabel = new Label(task.getAuthor());
         this.getChildren().addAll(titleLabel, authorLabel);

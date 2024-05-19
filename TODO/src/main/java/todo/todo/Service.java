@@ -94,7 +94,9 @@ public class Service {
                 Task task = new Task(title, description, creationDate, deadline, priority, status);
                 tasks.add(task);
             }
-            System.out.println("End of tasks");
+            if(response.equals("end")){
+                System.out.println("End of tasks");
+            }
         } catch (IOException e) {
             System.out.println("Server connection error: " + e.getMessage());
         }

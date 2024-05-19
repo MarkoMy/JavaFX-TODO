@@ -11,42 +11,53 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TodoScene {
     Image logoutbtn = new Image(getClass().getResource("/logoutbtnpic.png").toExternalForm());
     ImageView logoutbtnpic = new ImageView(logoutbtn);
     private Service service = new Service();
+    List<Task> tasks;
 
     public Scene createScene() {
         BorderPane todomainPane = new BorderPane();
         todomainPane.setPadding(new Insets(10));
-        List<Task> tasks = service.getTasks(Page.loginScene.getLoggedInUsername());
+        tasks = service.getTasks(Page.loginScene.getLoggedInUsername());
         displayTasks(tasks, todomainPane);
 
         // Fejléc
         HBox header = new HBox();
         header.setAlignment(Pos.TOP_LEFT);
         Button signOutButton = new Button();
+        signOutButton.getStyleClass().add("abutton");
         logoutbtnpic.setFitHeight(20);
         logoutbtnpic.setFitWidth(20);
         signOutButton.setGraphic(logoutbtnpic);
         header.getChildren().add(signOutButton);
         todomainPane.setTop(header);
+        BorderPane.setMargin(header, new Insets(0, 0, 10, 0));
 
-        VBox center = new VBox();
-        Label emptyLabel = new Label("itt nincs semmi látnivaló...");
-        center.getChildren().add(emptyLabel);
-        todomainPane.setCenter(center);
+        //tasks
+        displayTasks(tasks, todomainPane);
+
+        //bottom buttons
+        HBox bottomButtons = new HBox();
+        bottomButtons.setAlignment(Pos.BOTTOM_CENTER);
+        bottomButtons.setSpacing(10);
+
+        Button newGroupButton = new Button("Új csoport");
+        bottomButtons.getChildren().add(newGroupButton);
+        newGroupButton.getStyleClass().add("abutton");
+        BorderPane.setAlignment(newGroupButton, Pos.BOTTOM_LEFT);
+        BorderPane.setMargin(newGroupButton, new Insets(0, 10, 10, 0));
 
         Button plusButton = new Button("+");
-        todomainPane.setBottom(plusButton);
+        bottomButtons.getChildren().add(plusButton);
+        plusButton.getStyleClass().add("abutton");
         BorderPane.setAlignment(plusButton, Pos.BOTTOM_RIGHT);
         BorderPane.setMargin(plusButton, new Insets(0, 10, 10, 0));
 
-        Button newGroupButton = new Button("Új csoport");
-        todomainPane.setBottom(newGroupButton);
-        BorderPane.setAlignment(newGroupButton, Pos.BOTTOM_LEFT);
-        BorderPane.setMargin(newGroupButton, new Insets(0, 10, 10, 0));
+        todomainPane.setBottom(bottomButtons);
 
         newGroupButton.setOnAction(event -> {
             // Create labels and fields
@@ -80,7 +91,6 @@ public class TodoScene {
             // Add grid to the main pane
             todomainPane.setCenter(grid);
         });
-
 
         plusButton.setOnAction(event -> {
             // Create labels and fields
@@ -155,19 +165,35 @@ public class TodoScene {
         });
 
         Scene scene = new Scene(todomainPane, 450, 800);
-        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         return scene;
     }
-    private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
-        VBox taskList = new VBox();
-        if (tasks.isEmpty()) {
-            taskList.getChildren().add(new Label("itt nincs semmi látnivaló..."));
-        } else {
-            for (Task task : tasks) {
-                taskList.getChildren().add(new TaskPane(task));
-            }
+private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
+    VBox taskList = new VBox();
+    if (tasks.isEmpty()) {
+        taskList.getChildren().add(new Label("itt nincs semmi látnivaló..."));
+    } else {
+        for (Task task : tasks) {
+            Button taskButton = new Button(task.getTitle());
+            taskButton.getStyleClass().add("taskbutton");
+            taskButton.setOnAction(event -> showDetails(task, todomainPane));
+            taskList.getChildren().add(taskButton);
         }
-        todomainPane.setCenter(taskList);
+    }
+    todomainPane.setCenter(taskList);
+}
+    private void showDetails(Task task, BorderPane todomainPane) {
+        VBox taskDetails = new VBox();
+        Label titleLabel = new Label("Title: " + task.getTitle());
+        Label authorLabel = new Label("Author: " + task.getAuthor());
+        Label descriptionLabel = new Label("Description: " + task.getDescription());
+        Label deadlineLabel = new Label("Deadline: " + task.getDeadline());
+        Label priorityLabel = new Label("Priority: " + task.getPriority());
+        Label statusLabel = new Label("Status: " + task.getStatus());
+        Button backButton = new Button("Vissza");
+        backButton.setOnAction(event -> displayTasks(tasks, todomainPane));
+        taskDetails.getChildren().addAll(titleLabel, authorLabel, descriptionLabel, deadlineLabel, priorityLabel, statusLabel, backButton);
+        todomainPane.setCenter(taskDetails);
     }
 }
