@@ -1,5 +1,15 @@
 ---Group:IT
 |
+title=törléshez
+description=töröl
+creationdate=2024-05-20T16:00
+deadline=2024-05-21T16:00
+status=kész
+priority=igen
+author=Mark
+group=IT
+members=Mark,tesztacc,asd,Mark
+|
 title=tesztcím
 description=tesztleírás
 creationdate=2019-01-01T12:00:00

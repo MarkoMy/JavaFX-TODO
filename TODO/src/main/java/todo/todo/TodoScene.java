@@ -287,8 +287,16 @@ private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
         Label groupLabel = new Label("Group: " + task.getGroup());
         Label membersLabel = new Label("Members: " + task.getMembers());
         Button backButton = new Button("Vissza");
+        backButton.getStyleClass().add("abutton");
+        Button deleteButton = new Button("Törlés");
+        deleteButton.getStyleClass().add("abutton");
+        deleteButton.setOnAction(event -> {
+            service.deleteTask(task.getTitle());
+            tasks = service.getTasks(LoginScene.getLoggedInUsername());
+            displayTasks(tasks, todomainPane);
+        });
         backButton.setOnAction(event -> displayTasks(tasks, todomainPane));
-        taskDetails.getChildren().addAll(titleLabel, authorLabel, descriptionLabel, deadlineLabel, priorityLabel, statusLabel, groupLabel, membersLabel, backButton);
+        taskDetails.getChildren().addAll(titleLabel, authorLabel, descriptionLabel, deadlineLabel, priorityLabel, statusLabel, groupLabel, membersLabel, backButton, deleteButton);
         todomainPane.setCenter(taskDetails);
     }
 }

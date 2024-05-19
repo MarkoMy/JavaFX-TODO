@@ -76,12 +76,25 @@ public class Server {
                 case "getgroups":
                     sendgroups(clientSocket);
                     break;
+                case "deletetask":
+                    deletetask(parts[1]);
+
+                    break;
                 default:
                     // Handle unknown command
                     break;
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void deletetask(String title) {
+        for (Task task : tasks) {
+            if (task.getTitle() != null && task.getTitle().equals(title)) {
+                tasks.remove(task);
+                break;
+            }
         }
     }
 

@@ -191,4 +191,17 @@ public class Service {
         }
         return groupNames;
     }
+
+    public void deleteTask(String title) {
+        //sent delete message to server
+        try {
+            Service();
+            String deleteMessage = "deletetask|" + title;
+            out.println(deleteMessage);
+            out.flush();
+        } catch (Exception e) {
+            System.out.println("Server connection error: " + e.getMessage());
+        }
+
+    }
 }
