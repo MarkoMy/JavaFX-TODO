@@ -1,11 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The User class represents a user with a username, password, and a list of tasks.
+ */
 public class User {
     private String username;
     private String password;
     private List<Task> tasks;
 
+    /**
+     * Constructs a new User with an empty task list.
+     */
     public User() {
         this.tasks = new ArrayList<>();
     }

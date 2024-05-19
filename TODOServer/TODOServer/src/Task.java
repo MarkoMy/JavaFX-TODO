@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The Task class represents a task with various attributes such as title, description,
+ * creation date, deadline, priority, status, author, assigned users, and edit histories.
+ */
 public class Task {
     private String title;
     private String description;
@@ -16,12 +20,25 @@ public class Task {
     private List<User> assignedUsers;
     private List<EditHistory> editHistories;
 
+    /**
+     * Constructs a new Task with the current creation date and empty lists for assigned users and edit histories.
+     */
     public Task() {
         this.creationDate = LocalDateTime.now();
         this.assignedUsers = new ArrayList<>();
         this.editHistories = new ArrayList<>();
     }
 
+    /**
+     * Edits the task with new values and records the edit history.
+     *
+     * @param user the user who edits the task
+     * @param title the new title of the task
+     * @param description the new description of the task
+     * @param deadline the new deadline of the task
+     * @param priority the new priority of the task
+     * @param status the new status of the task
+     */
     public void editTask(User user, String title, String description, LocalDateTime deadline, String priority, String status) {
         this.title = title;
         this.description = description;
@@ -31,11 +48,19 @@ public class Task {
         this.editHistories.add(new EditHistory(user, LocalDateTime.now()));
     }
 
+    /**
+     * Shares the task with a group.
+     *
+     * @param group the group to share the task with
+     */
     public void shareTask(Group group) {
         this.group = group;
         group.getTasks().add(this);
     }
 
+    /**
+     * Deletes the task by removing it from the author's and group's task lists.
+     */
     public void deleteTask() {
         this.author.getTasks().remove(this);
         this.group.getTasks().remove(this);

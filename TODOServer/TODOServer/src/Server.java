@@ -6,6 +6,17 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/*
+
+Helló! Ez a projekt félkész, a feladat leírásában elvesztem, és ami után túlsok időt beleraktam,
+és csak utána jöttem rá, hogy az egészet máshogy kellett volna csinálni, és így nem tudom befejezni.
+Elnézést a káoszért, de a kód nagy része működik.
+*/
+
+/**
+ * The Server class represents a simple server application that handles client connections
+ * and processes various commands related to user management and task handling.
+ */
 public class Server {
     public List<User> users;
     private List<Task> tasks;
@@ -14,6 +25,9 @@ public class Server {
     private ServerSocket serverSocket;
     private Set<String> loggedInUsers;
 
+    /**
+     * Constructs a Server object and initializes the necessary data structures.
+     */
     public Server() {
         loggedInUsers = new HashSet<>();
         users = new ArrayList<>();
@@ -22,6 +36,11 @@ public class Server {
         fileHandler = new FileHandler();
     }
 
+    /**
+     * The main method starts the server and loads the tasks.
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         Server server = new Server();
         server.loadTasks();
@@ -29,6 +48,10 @@ public class Server {
         server.startServer();
     }
 
+    /**
+     * Starts the server and waits for client connections.
+     * When a client connects, it handles the client's message.
+     */
     public void startServer() {
         try {
             serverSocket = new ServerSocket(8080);
@@ -43,6 +66,11 @@ public class Server {
         }
     }
 
+    /**
+     * Handles the message from the client based on the command received.
+     *
+     * @param clientSocket the client socket
+     */
     public void handleClientMessage(Socket clientSocket) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -89,6 +117,11 @@ public class Server {
         }
     }
 
+    /**
+     * Deletes a task based on its title.
+     *
+     * @param title the title of the task to be deleted
+     */
     private void deletetask(String title) {
         for (Task task : tasks) {
             if (task.getTitle() != null && task.getTitle().equals(title)) {
@@ -98,6 +131,11 @@ public class Server {
         }
     }
 
+    /**
+     * Sends the list of groups to the client.
+     *
+     * @param clientSocket the client socket
+     */
     private void sendgroups(Socket clientSocket) {
         try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
             if(groups.isEmpty()){
@@ -115,6 +153,11 @@ public class Server {
         }
     }
 
+    /**
+     * Sends the list of usernames to the client.
+     *
+     * @param clientSocket the client socket
+     */
     private void sendusernames(Socket clientSocket) {
         users.clear(); // Clear the users list before reading from the file
         List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
@@ -129,6 +172,12 @@ public class Server {
         }
     }
 
+    /**
+     * Creates a new group with the given name and adds it to the list of groups.
+     *
+     * @param username  the username of the user creating the group
+     * @param groupName the name of the new group
+     */
     private void newGroup(String username, String groupName) {
         User user = findUserByName(username);
         if (user == null) {
@@ -148,6 +197,12 @@ public class Server {
         }
     }
 
+    /**
+     * Sends the task list of a user to the client.
+     *
+     * @param clientSocket the client socket
+     * @param username     the username of the user whose tasks are to be sent
+     */
     public void sendTaskList(Socket clientSocket, String username) {
         System.out.printf("Sending task list to user %s%n", username);
         List<Task> userTasks = new ArrayList<>();
@@ -191,6 +246,13 @@ public class Server {
         }
     }
 
+    /**
+     * Checks if the user is assigned to the task.
+     *
+     * @param task     the task to check
+     * @param username the username of the user
+     * @return true if the user is assigned to the task, false otherwise
+     */
     private boolean isUserAssigned(Task task, String username) {
         for (User user : task.getAssignedUsers()) {
             if (user.getUsername().equals(username)) {
@@ -200,6 +262,14 @@ public class Server {
         return false;
     }
 
+    /**
+     * Registers a new user with the given username and password.
+     *
+     * @param username     the username of the new user
+     * @param password     the password of the new user
+     * @param clientSocket the client socket
+     * @throws IOException if an I/O error occurs
+     */
     public void registerUser(String username, String password, Socket clientSocket) throws IOException {
         String s = fileHandler.writeToFile("logins.txt", users, username, password);
         if(s.equals("User registered")){
@@ -209,6 +279,13 @@ public class Server {
         }
     }
 
+    /**
+     * Logs in a user with the given username and password.
+     *
+     * @param username     the username of the user
+     * @param password     the password of the user
+     * @param clientSocket the client socket
+     */
     public void loginUser(String username, String password, Socket clientSocket) {
         List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
         for (User user : fileUsers) {
@@ -221,6 +298,13 @@ public class Server {
         sendClientMessage("Login failed", clientSocket);
     }
 
+    /**
+     * Logs out a user with the given username.
+     *
+     * @param username     the username of the user
+     * @param password     the password of the user
+     * @param clientSocket the client socket
+     */
     public void logoutUser(String username, String password, Socket clientSocket) {
         if (loggedInUsers.contains(username)) {
             loggedInUsers.remove(username);
@@ -229,6 +313,13 @@ public class Server {
             sendClientMessage("Logout failed: user is not logged in", clientSocket);
         }
     }
+
+    /**
+     * Sends a message to the client.
+     *
+     * @param message      the message to be sent
+     * @param clientSocket the client socket
+     */
     public void sendClientMessage(String message, Socket clientSocket) {
         try {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -238,6 +329,19 @@ public class Server {
         }
     }
 
+    /**
+     * Adds a new task with the given details.
+     *
+     * @param author       the author of the task
+     * @param title        the title of the task
+     * @param description  the description of the task
+     * @param creationDate the creation date of the task
+     * @param deadline     the deadline of the task
+     * @param priority     the priority of the task
+     * @param status       the status of the task
+     * @param group        the group of the task
+     * @param people       the people assigned to the task
+     */
     public void addTask(String author, String title, String description, String creationDate, String deadline, String priority, String status, String group, String people) {
         User aauthor = findUserByName(author);
         if (aauthor == null) {
@@ -250,8 +354,6 @@ public class Server {
             System.out.println("Group does not exist");
             return;
         }
-
-
 
         Task task = new Task();
         task.setTitle(title);
@@ -285,6 +387,11 @@ public class Server {
         saveTask(task);
     }
 
+    /**
+     * Saves a task to the file.
+     *
+     * @param task the task to be saved
+     */
     public void saveTask(Task task) {
         try {
             List<String> originalFileContent = Files.readAllLines(Paths.get("Tasks.txt"));
@@ -314,6 +421,12 @@ public class Server {
         }
     }
 
+    /**
+     * Adds a task's details to the content list.
+     *
+     * @param task    the task to be added
+     * @param content the content list
+     */
     private void addTaskToContent(Task task, List<String> content) {
         content.add("|");
         content.add("title=" + task.getTitle());
@@ -335,6 +448,13 @@ public class Server {
         content.add(members.toString());
         content.add("|");
     }
+
+    /**
+     * Checks if the group is already written to the file.
+     *
+     * @param group the group to check
+     * @return true if the group is written, false otherwise
+     */
     private boolean isGroupWritten(Group group) {
         try (BufferedReader reader = new BufferedReader(new FileReader("Tasks.txt"))) {
             String line;
@@ -349,6 +469,9 @@ public class Server {
         return false;
     }
 
+    /**
+     * Loads tasks from the file into memory.
+     */
     public void loadTasks() {
         try (BufferedReader reader = new BufferedReader(new FileReader("Tasks.txt"))) {
             String line;
@@ -413,6 +536,12 @@ public class Server {
         }
     }
 
+    /**
+     * Finds a user by their username.
+     *
+     * @param name the username to search for
+     * @return the User object if found, null otherwise
+     */
     private User findUserByName(String name) {
         List<User> fileUsers = fileHandler.readFromFile("logins.txt", new ArrayList<>());
         for (User user : fileUsers) {
@@ -423,6 +552,12 @@ public class Server {
         return null;
     }
 
+    /**
+     * Finds a group by its name.
+     *
+     * @param name the group name to search for
+     * @return the Group object if found, null otherwise
+     */
     private Group findGroupByName(String name) {
         for (Group group : groups) {
             if (group.getName().equals(name)) {
@@ -432,6 +567,9 @@ public class Server {
         return null;
     }
 
+    /**
+     * Prints the list of tasks to the console.
+     */
     public void printTasksToConsole() {
         for (Task task : tasks) {
             System.out.println("Title: " + task.getTitle());
