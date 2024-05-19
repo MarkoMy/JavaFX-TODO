@@ -54,6 +54,7 @@ public class Server {
                     logoutUser(parts[1], parts[2], clientSocket);
                     break;
                 case "login":
+                    System.out.println("Login command received");
                     loginUser(parts[1], parts[2], clientSocket);
                     break;
                 case "register":
@@ -61,12 +62,37 @@ public class Server {
                     break;
                 case "newtask":
                     addTask(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9]);
+                    break;
                 case "gettasks":
                     sendTaskList(clientSocket, parts[1]);
+                    break;
+                case "newgroup":
+                    System.out.println("New group command received");
+                    newGroup(parts[1], parts[2]);
+                    break;
                 default:
                     // Handle unknown command
                     break;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void newGroup(String username, String groupName) {
+        User user = findUserByName(username);
+        if (user == null) {
+            System.out.println("User does not exist");
+            return;
+        }
+
+        Group group = new Group();
+        group.setName(groupName);
+        groups.add(group);
+
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(new File("Tasks.txt"), true))) {
+            writer.println("---Group:" + group.getName());
+            writer.println("|");
         } catch (IOException e) {
             e.printStackTrace();
         }

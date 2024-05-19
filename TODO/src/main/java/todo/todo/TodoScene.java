@@ -61,10 +61,14 @@ public class TodoScene {
         todomainPane.setBottom(bottomButtons);
 
         newGroupButton.setOnAction(event -> {
+            bottomButtons.setVisible(false);
             // Create labels and fields
             Label groupLabel = new Label("Csoportnév:");
             TextField groupField = new TextField();
             Button sendButton = new Button("Mentés");
+            sendButton.getStyleClass().add("abutton");
+            Button backButton = new Button("Vissza");
+            backButton.getStyleClass().add("abutton");
 
             // Create layout and add fields
             GridPane grid = new GridPane();
@@ -72,9 +76,18 @@ public class TodoScene {
             grid.add(groupLabel, 1, 1);
             grid.add(groupField, 2, 1);
             grid.add(sendButton, 2, 2);
+            grid.add(backButton, 2, 3);
 
-            sendButton.setOnAction(event1 -> {
-                String username = Page.loginScene.getLoggedInUsername();
+            backButton.setOnAction(event2 -> {
+                grid.getChildren().clear();
+                tasks = service.getTasks(LoginScene.getLoggedInUsername());
+                displayTasks(tasks, todomainPane);
+                // Show the bottom buttons again
+                bottomButtons.setVisible(true);
+            });
+
+            sendButton.setOnAction(event2 -> {
+                String username = LoginScene.getLoggedInUsername();
                 String group = groupField.getText();
 
                 //if empty than throw error
@@ -85,8 +98,12 @@ public class TodoScene {
                     alert.setContentText("A mező nem lehet üres!");
                     alert.showAndWait();
                 } else {
+                    System.out.printf("New group: %s\n", group);
                     service.newGroup(username, group);
                     grid.getChildren().clear();
+                    tasks = service.getTasks(LoginScene.getLoggedInUsername());
+                    displayTasks(tasks, todomainPane);
+                    bottomButtons.setVisible(true);
                 }
             });
             // Add grid to the main pane
