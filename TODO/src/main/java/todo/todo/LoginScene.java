@@ -7,20 +7,19 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginScene{
-    private String loggedInUsername;
+    public static String loggedInUsername;
     private String loggedInPassword;
     Service loginService = new Service();
-
 
     public Scene createScene() {
         //main pane
@@ -118,11 +117,9 @@ public class LoginScene{
                     loggedInUsername = username;
                     loggedInPassword = password;
                     System.out.println("Login successful");
-                    loginService.getTasks();
                     Scene todoScene = Page.todoScene.createScene();
                     Stage stage = (Stage) mainPane.getScene().getWindow();
                     stage.setScene(todoScene);
-
                 }
             });
 
@@ -160,7 +157,7 @@ public class LoginScene{
         return scene;
     }
 
-    public String getLoggedInUsername() {
+    public static String getLoggedInUsername() {
         return loggedInUsername;
     }
 

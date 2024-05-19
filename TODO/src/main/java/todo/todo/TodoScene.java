@@ -6,11 +6,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TodoScene {
     Image logoutbtn = new Image(getClass().getResource("/logoutbtnpic.png").toExternalForm());
@@ -20,6 +20,8 @@ public class TodoScene {
     public Scene createScene() {
         BorderPane todomainPane = new BorderPane();
         todomainPane.setPadding(new Insets(10));
+        List<Task> tasks = service.getTasks(Page.loginScene.getLoggedInUsername());
+        displayTasks(tasks, todomainPane);
 
         // Fejléc
         HBox header = new HBox();
@@ -156,5 +158,16 @@ public class TodoScene {
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
         return scene;
+    }
+    private void displayTasks(List<Task> tasks, BorderPane todomainPane) {
+        VBox taskList = new VBox();
+        if (tasks.isEmpty()) {
+            taskList.getChildren().add(new Label("itt nincs semmi látnivaló..."));
+        } else {
+            for (Task task : tasks) {
+                taskList.getChildren().add(new TaskPane(task));
+            }
+        }
+        todomainPane.setCenter(taskList);
     }
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Service {
     private static final String SERVER_IP = "localhost";
@@ -71,20 +73,32 @@ public class Service {
         out.flush();
     }
 
-    public void getTasks(){
-        //Getting tasks from the server
-        try{
+    public List<Task> getTasks(String username) {
+        Service();
+        List<Task> tasks = new ArrayList<>();
+        try {
+            String getTasksMessage = "gettasks "+ username;
+            System.out.println(getTasksMessage);
+            out.println(getTasksMessage);
             String response;
             System.out.println("Getting tasks from server");
             while (!(response = in.readLine()).equals("end")) {
                 System.out.printf("Server response: %s\n", response);
+                String[] parts = response.split("\\|");
+                String title = parts[0];
+                String description = parts[1];
+                String creationDate = parts[2];
+                String deadline = parts[3];
+                String priority = parts[4];
+                String status = parts[5];
+                Task task = new Task(title, description, creationDate, deadline, priority, status);
+                tasks.add(task);
             }
             System.out.println("End of tasks");
-
         } catch (IOException e) {
             System.out.println("Server connection error: " + e.getMessage());
         }
-
+        return tasks;
     }
 
     public void newGroup(String username, String group) {

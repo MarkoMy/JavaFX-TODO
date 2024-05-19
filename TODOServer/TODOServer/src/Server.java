@@ -59,6 +59,8 @@ public class Server {
                     break;
                 case "newtask":
                     addTask(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+                case "gettasks":
+                    sendTaskList(clientSocket, parts[1]);
                 default:
                     // Handle unknown command
                     break;
@@ -100,8 +102,14 @@ public class Server {
                 return;
             }
             for (Task task : userTasks) {
-                out.println(task.getTitle() + "|" + task.getDescription() + "|" + task.getCreationDate() + "|"
-                        + task.getDeadline() + "|" + task.getPriority() + "|" + task.getStatus());
+                StringJoiner joiner = new StringJoiner("|");
+                joiner.add(task.getTitle())
+                        .add(task.getDescription())
+                        .add(task.getCreationDate().toString())
+                        .add(task.getDeadline().toString())
+                        .add(task.getPriority())
+                        .add(task.getStatus());
+                out.println(joiner.toString());
             }
             out.println("end");
         } catch (IOException e) {
@@ -133,7 +141,7 @@ public class Server {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
                 loggedInUsers.add(username);
                 sendClientMessage("Login successful", clientSocket);
-                sendTaskList(clientSocket, username);
+                //sendTaskList(clientSocket, username);
                 return;
             }
         }
