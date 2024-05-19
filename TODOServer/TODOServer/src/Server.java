@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -46,7 +48,7 @@ public class Server {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String clientMessage = in.readLine();
             System.out.println("Received message: " + clientMessage);
-            String[] parts = clientMessage.split(" ");
+            String[] parts = clientMessage.split("\\|");
             switch (parts[0]) {
                 case "logout":
                     logoutUser(parts[1], parts[2], clientSocket);
@@ -58,7 +60,7 @@ public class Server {
                     registerUser(parts[1], parts[2], clientSocket);
                     break;
                 case "newtask":
-                    addTask(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+                    addTask(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8], parts[9]);
                 case "gettasks":
                     sendTaskList(clientSocket, parts[1]);
                 default:
@@ -68,18 +70,6 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void addTask(String username, String title, String desc, String deadline, String priority, String status) {
-        //Az egyes task-oknak legyen címe, leírása, létrehozás dátuma, határideje, prioritása, állapota, szerzője, csoportja, és a csoportból hozzárendelhető személyek (szerkesztők, dolgozók).
-        Task newtask = new Task();
-        newtask.setTitle(title);
-        newtask.setDescription(desc);
-        newtask.setCreationDate(LocalDateTime.now());
-        newtask.setDeadline(LocalDateTime.parse(deadline));
-        newtask.setPriority(priority);
-        newtask.setStatus(status);
-        tasks.add(newtask);
     }
 
     public void sendTaskList(Socket clientSocket, String username) {
@@ -165,21 +155,105 @@ public class Server {
         }
     }
 
-    public void saveTasks() {
-        try (PrintWriter writer = new PrintWriter(new File("Tasks.txt"))) {
-            for (Task task : tasks) {
-                StringJoiner joiner = new StringJoiner(",");
-                joiner.add(task.getTitle())
-                        .add(task.getDescription())
-                        .add(task.getCreationDate().toString())
-                        .add(task.getDeadline().toString())
-                        .add(task.getPriority())
-                        .add(task.getStatus());
-                writer.println(joiner.toString());
+    public void addTask(String author, String title, String description, String creationDate, String deadline, String priority, String status, String group, String people) {
+        User aauthor = findUserByName(author);
+        if (aauthor == null) {
+            System.out.println("Author does not exist");
+            return;
+        }
+
+        Group groupName = findGroupByName(group);
+        if (groupName == null) {
+            System.out.println("Group does not exist");
+            return;
+        }
+
+        User assignedUser = findUserByName(people);
+        if (assignedUser == null) {
+            System.out.println("Assigned user does not exist");
+            return;
+        }
+
+        Task task = new Task();
+        task.setTitle(title);
+        task.setDescription(description);
+        task.setCreationDate(LocalDateTime.parse(creationDate));
+        task.setDeadline(LocalDateTime.parse(deadline));
+        task.setPriority(priority);
+        task.setStatus(status);
+        task.setAuthor(aauthor);
+        task.setGroup(groupName);
+        task.getAssignedUsers().add(assignedUser);
+
+        tasks.add(task);
+        groupName.getTasks().add(task);
+
+        // Save the new task to the file
+        saveTask(task);
+    }
+
+    public void saveTask(Task task) {
+        try {
+            List<String> originalFileContent = Files.readAllLines(Paths.get("Tasks.txt"));
+            List<String> modifiedFileContent = new ArrayList<>();
+            boolean isGroupFound = false;
+
+            for (String line : originalFileContent) {
+                if (line.startsWith("---Group:") && line.substring(9).equals(task.getGroup().getName())) {
+                    isGroupFound = true;
+                }
+
+                if (!isGroupFound || !line.equals("|")) {
+                    modifiedFileContent.add(line);
+                } else {
+                    addTaskToContent(task, modifiedFileContent);
+                    isGroupFound = false;
+                }
+            }
+
+            if (isGroupFound) {
+                addTaskToContent(task, modifiedFileContent);
+            }
+
+            Files.write(Paths.get("Tasks.txt"), modifiedFileContent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addTaskToContent(Task task, List<String> content) {
+        content.add("|");
+        content.add("title=" + task.getTitle());
+        content.add("description=" + task.getDescription());
+        content.add("creationdate=" + task.getCreationDate().toString());
+        content.add("deadline=" + task.getDeadline().toString());
+        content.add("status=" + task.getStatus());
+        content.add("priority=" + task.getPriority());
+        content.add("author=" + task.getAuthor().getUsername());
+        content.add("group=" + task.getGroup().getName());
+        StringBuilder members = new StringBuilder("members=");
+        for (int i = 0; i < task.getAssignedUsers().size(); i++) {
+            User user = task.getAssignedUsers().get(i);
+            members.append(user.getUsername());
+            if (i < task.getAssignedUsers().size() - 1) {
+                members.append(",");
+            }
+        }
+        content.add(members.toString());
+        content.add("|");
+    }
+    private boolean isGroupWritten(Group group) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("Tasks.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.equals("---Group:" + group.getName())) {
+                    return true;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     public void loadTasks() {
@@ -251,6 +325,15 @@ public class Server {
         for (User user : fileUsers) {
             if (user.getUsername().equals(name)) {
                 return user;
+            }
+        }
+        return null;
+    }
+
+    private Group findGroupByName(String name) {
+        for (Group group : groups) {
+            if (group.getName().equals(name)) {
+                return group;
             }
         }
         return null;

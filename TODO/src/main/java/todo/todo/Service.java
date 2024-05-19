@@ -28,7 +28,7 @@ public class Service {
     public String sendLoginData(String username, String password) {
         try{
             Service();
-            String loginMessage = "login " + username + " " + password;
+            String loginMessage = "login|" + username + "|" + password;
             System.out.println(loginMessage);
             out.println(loginMessage);
 
@@ -43,7 +43,7 @@ public class Service {
     }
     public void sendLogoutMessage(String username, String password) {
         Service();
-        String logoutMessage = "logout " + username + " " + password;
+        String logoutMessage = "logout|" + username + "|" + password;
         out.println(logoutMessage);
         close();
     }
@@ -51,7 +51,7 @@ public class Service {
     public String sendRegisterData(String username, String password) {
         try{
             Service();
-            String registerMessage = "register " + username + " " + password;
+            String registerMessage = "register|" + username + "|" + password;
             out.println(registerMessage);
             out.flush();
 
@@ -65,10 +65,12 @@ public class Service {
         }
     }
 
-    public void sendTaskMessage(String username, String title, String description, String deadline, String priority, String status) {
+    //username, title, description, creationDate, deadline, priority, status, group, people
+    public void sendTaskMessage(String username, String title, String description,String creationDate, String deadline, String priority, String status, String group, String people) {
         //send task message to server
         Service();
-        String taskMessage = "newtask " + username + " "  + title + " " + description + " " + deadline + " " + priority + " " + status;
+        String taskMessage = "newtask|" + username + "|" + title + "|" + description + "|" + creationDate + "|"
+                                        + deadline + "|" + priority + "|" + status + "|" + group + "|" + people;
         out.println(taskMessage);
         out.flush();
     }
@@ -77,7 +79,7 @@ public class Service {
         Service();
         List<Task> tasks = new ArrayList<>();
         try {
-            String getTasksMessage = "gettasks "+ username;
+            String getTasksMessage = "gettasks|"+ username;
             System.out.println(getTasksMessage);
             out.println(getTasksMessage);
             String response;
@@ -106,7 +108,7 @@ public class Service {
     public void newGroup(String username, String group) {
         Service();
         //send group message to server
-        String groupMessage = "newgroup " + username + " " + group;
+        String groupMessage = "newgroup|" + username + "|" + group;
         out.println(groupMessage);
         out.flush();
     }

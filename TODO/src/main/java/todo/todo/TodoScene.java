@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -93,19 +94,30 @@ public class TodoScene {
         });
 
         plusButton.setOnAction(event -> {
+            // Hide the bottom buttons
+            bottomButtons.setVisible(false);
+
             // Create labels and fields
             Label titleLabel = new Label("Cím:");
             TextField titleField = new TextField();
             Label descriptionLabel = new Label("Leírás:");
             TextField descriptionField = new TextField();
             Label deadlineLabel = new Label("Határidő:");
-            TextField deadlineField = new TextField();
-            deadlineField.setText("yyyy-MM-ddTHH:mm:ss");
+            DatePicker deadlineDatePicker = new DatePicker();
+            deadlineDatePicker.setValue(LocalDate.now().plusDays(1));
+            TextField timeField = new TextField();
+            timeField.setPromptText("HH:mm");
             Label priorityLabel = new Label("Prioritás:");
             TextField priorityField = new TextField();
             Label statusLabel = new Label("Státusz:");
             TextField statusField = new TextField();
+            Label groupLabel = new Label("Csoport:");
+            TextField groupField = new TextField();
+            Label peopleLabel = new Label("Személyek hozzáadása:");
+            ComboBox<String> peopleComboBox = new ComboBox<>();
+            peopleComboBox.getItems().addAll("Maja", "Márk", "a", "Scolwerz");
             Button sendButton = new Button("Mentés");
+            Button visszaButton = new Button("Vissza");
 
             // Create layout and add fields
             GridPane grid = new GridPane();
@@ -114,46 +126,60 @@ public class TodoScene {
             grid.add(titleField, 2, 1);
             grid.add(descriptionLabel, 1, 2);
             grid.add(descriptionField, 2, 2);
-            grid.add(deadlineLabel, 1, 3);
-            grid.add(deadlineField, 2, 3);
-            grid.add(priorityLabel, 1, 4);
-            grid.add(priorityField, 2, 4);
-            grid.add(statusLabel, 1, 5);
-            grid.add(statusField, 2, 5);
-            grid.add(sendButton, 2, 6);
+            grid.add(deadlineLabel, 1, 4);
+            grid.add(deadlineDatePicker, 2, 4);
+            grid.add(timeField, 3, 4);
+            grid.add(priorityLabel, 1, 5);
+            grid.add(priorityField, 2, 5);
+            grid.add(statusLabel, 1, 6);
+            grid.add(statusField, 2, 6);
+            grid.add(groupLabel, 1, 7);
+            grid.add(groupField, 2, 7);
+            grid.add(peopleLabel, 1, 8);
+            grid.add(peopleComboBox, 2, 8);
+            grid.add(sendButton, 2, 9);
+            grid.add(visszaButton, 2, 10);
+
+            visszaButton.setOnAction(event1 -> {
+                grid.getChildren().clear();
+                tasks = service.getTasks(LoginScene.getLoggedInUsername());
+                displayTasks(tasks, todomainPane);
+                // Show the bottom buttons again
+                bottomButtons.setVisible(true);
+            });
 
             sendButton.setOnAction(event1 -> {
-                String username = Page.loginScene.getLoggedInUsername();
+                String username = LoginScene.getLoggedInUsername();
                 String title = titleField.getText();
                 String description = descriptionField.getText();
-                String deadline = deadlineField.getText();
+                String creationDate = LocalDate.now().toString() + "T" + timeField.getText() + ":00";
+                String deadline = deadlineDatePicker.getValue().toString() + "T" + timeField.getText() + ":00";
                 String priority = priorityField.getText();
                 String status = statusField.getText();
+                String group = groupField.getText();
+                String people = peopleComboBox.getValue();
 
                 //if empty than throw error
-                if (title.isEmpty() || description.isEmpty() || deadline.isEmpty() || priority.isEmpty() || status.isEmpty()) {
+                if (title.isEmpty() || description.isEmpty() || creationDate.isEmpty() || deadline.isEmpty() || priority.isEmpty() || status.isEmpty() || group.isEmpty() || people.isEmpty()) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Hiba");
                     alert.setHeaderText(null);
                     alert.setContentText("A mezők nem lehetnek üresek!");
                     alert.showAndWait();
                 } else {
-                    //if the deadline is not in the correct format, throw an error yyyy-MM-ddTHH:mm:ss
-                    if (!deadline.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}")) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Hiba");
-                        alert.setHeaderText(null);
-                        alert.setContentText("A határidő formátuma nem megfelelő! (yyyy-MM-ddTHH:mm:ss)");
-                        alert.showAndWait();
-                    } else {
-                        service.sendTaskMessage(username, title, description, deadline, priority, status);
-                        grid.getChildren().clear();
-                    }
+                    service.sendTaskMessage(username, title, description, creationDate, deadline, priority, status, group, people);
+                    grid.getChildren().clear();
+                    tasks = service.getTasks(LoginScene.getLoggedInUsername());
+                    displayTasks(tasks, todomainPane);
+                    // Show the bottom buttons again
+                    bottomButtons.setVisible(true);
+                    System.out.println("Task sent");
+
                 }
             });
-            // Add grid to the main pane
-            todomainPane.setCenter(grid);
-        });
+    // Add grid to the main pane
+    todomainPane.setCenter(grid);
+});
 
         signOutButton.setOnAction(event -> {
             String username = Page.loginScene.getLoggedInUsername();
