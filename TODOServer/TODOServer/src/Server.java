@@ -5,25 +5,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-
-/*
-
-Helló! Ez a projekt félkész, a feladat leírásában elvesztem, és ami után túlsok időt beleraktam,
-és csak utána jöttem rá, hogy az egészet máshogy kellett volna csinálni, és így nem tudom befejezni.
-Elnézést a káoszért, de a kód nagy része működik.
-*/
+import java.util.concurrent.*;
 
 /**
  * The Server class represents a simple server application that handles client connections
  * and processes various commands related to user management and task handling.
  */
 public class Server {
-    public List<User> users;
-    private List<Task> tasks;
-    private List<Group> groups;
+    public List<User> users = Collections.synchronizedList(new ArrayList<>());
+    private List<Task> tasks = Collections.synchronizedList(new ArrayList<>());
+    private List<Group> groups = Collections.synchronizedList(new ArrayList<>());
+
     private FileHandler fileHandler;
     private ServerSocket serverSocket;
-    private Set<String> loggedInUsers;
+    private Set<String> loggedInUsers = Collections.synchronizedSet(new HashSet<>());
+
 
     /**
      * Constructs a Server object and initializes the necessary data structures.
@@ -57,9 +53,11 @@ public class Server {
             serverSocket = new ServerSocket(8080);
             System.out.println("Server started.");
 
+            ExecutorService executorService = Executors.newCachedThreadPool();
+
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                handleClientMessage(clientSocket);
+                executorService.execute(() -> handleClientMessage(clientSocket));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,7 +120,7 @@ public class Server {
      *
      * @param title the title of the task to be deleted
      */
-    private void deletetask(String title) {
+    private synchronized void deletetask(String title) {
         for (Task task : tasks) {
             if (task.getTitle() != null && task.getTitle().equals(title)) {
                 tasks.remove(task);
@@ -136,7 +134,7 @@ public class Server {
      *
      * @param clientSocket the client socket
      */
-    private void sendgroups(Socket clientSocket) {
+    private synchronized void sendgroups(Socket clientSocket) {
         try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
             if(groups.isEmpty()){
                 writer.println("No groups found");
@@ -158,7 +156,7 @@ public class Server {
      *
      * @param clientSocket the client socket
      */
-    private void sendusernames(Socket clientSocket) {
+    private synchronized void sendusernames(Socket clientSocket) {
         users.clear(); // Clear the users list before reading from the file
         List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
         try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
@@ -178,7 +176,7 @@ public class Server {
      * @param username  the username of the user creating the group
      * @param groupName the name of the new group
      */
-    private void newGroup(String username, String groupName) {
+    private synchronized void newGroup(String username, String groupName) {
         User user = findUserByName(username);
         if (user == null) {
             System.out.println("User does not exist");
@@ -203,7 +201,7 @@ public class Server {
      * @param clientSocket the client socket
      * @param username     the username of the user whose tasks are to be sent
      */
-    public void sendTaskList(Socket clientSocket, String username) {
+    public synchronized void sendTaskList(Socket clientSocket, String username) {
         System.out.printf("Sending task list to user %s%n", username);
         List<Task> userTasks = new ArrayList<>();
         for (Task task : tasks) {
@@ -270,7 +268,14 @@ public class Server {
      * @param clientSocket the client socket
      * @throws IOException if an I/O error occurs
      */
-    public void registerUser(String username, String password, Socket clientSocket) throws IOException {
+    public synchronized void registerUser(String username, String password, Socket clientSocket) throws IOException {
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                sendClientMessage("Registration failed", clientSocket);
+                return;
+            }
+        }
+
         String s = fileHandler.writeToFile("logins.txt", users, username, password);
         if(s.equals("User registered")){
             sendClientMessage("Registration successful", clientSocket);
@@ -286,7 +291,7 @@ public class Server {
      * @param password     the password of the user
      * @param clientSocket the client socket
      */
-    public void loginUser(String username, String password, Socket clientSocket) {
+    public synchronized void loginUser(String username, String password, Socket clientSocket) {
         List<User> fileUsers = fileHandler.readFromFile("logins.txt", users);
         for (User user : fileUsers) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
@@ -305,7 +310,7 @@ public class Server {
      * @param password     the password of the user
      * @param clientSocket the client socket
      */
-    public void logoutUser(String username, String password, Socket clientSocket) {
+    public synchronized void logoutUser(String username, String password, Socket clientSocket) {
         if (loggedInUsers.contains(username)) {
             loggedInUsers.remove(username);
             sendClientMessage("Logout successful", clientSocket);
@@ -320,7 +325,7 @@ public class Server {
      * @param message      the message to be sent
      * @param clientSocket the client socket
      */
-    public void sendClientMessage(String message, Socket clientSocket) {
+    public synchronized void sendClientMessage(String message, Socket clientSocket) {
         try {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             out.println(message);
@@ -342,7 +347,7 @@ public class Server {
      * @param group        the group of the task
      * @param people       the people assigned to the task
      */
-    public void addTask(String author, String title, String description, String creationDate, String deadline, String priority, String status, String group, String people) {
+    public synchronized void addTask(String author, String title, String description, String creationDate, String deadline, String priority, String status, String group, String people) {
         User aauthor = findUserByName(author);
         if (aauthor == null) {
             System.out.println("Author does not exist");
@@ -427,7 +432,7 @@ public class Server {
      * @param task    the task to be added
      * @param content the content list
      */
-    private void addTaskToContent(Task task, List<String> content) {
+    private synchronized void addTaskToContent(Task task, List<String> content) {
         content.add("|");
         content.add("title=" + task.getTitle());
         content.add("description=" + task.getDescription());
@@ -455,7 +460,7 @@ public class Server {
      * @param group the group to check
      * @return true if the group is written, false otherwise
      */
-    private boolean isGroupWritten(Group group) {
+    private synchronized boolean isGroupWritten(Group group) {
         try (BufferedReader reader = new BufferedReader(new FileReader("Tasks.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {

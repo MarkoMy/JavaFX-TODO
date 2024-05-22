@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Group {
     private String name;
-    private List<User> users;
-    private List<Task> tasks;
+    public List<User> users = Collections.synchronizedList(new ArrayList<>());
+    private List<Task> tasks = Collections.synchronizedList(new ArrayList<>());
 
     public Group() {
         this.tasks = new ArrayList<>();

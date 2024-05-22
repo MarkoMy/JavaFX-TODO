@@ -16,7 +16,7 @@ public class FileHandler {
      * @param users    the list to populate with user data
      * @return the list of users read from the file
      */
-    public List<User> readFromFile(String filename, List<User> users) {
+    public synchronized List<User> readFromFile(String filename, List<User> users) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
@@ -46,7 +46,7 @@ public class FileHandler {
      * @return a message indicating whether the user was registered successfully or if the user already exists
      * @throws IOException if an I/O error occurs
      */
-    public String writeToFile(String filename, List<User> users,  String username, String password) throws IOException {
+    public synchronized String writeToFile(String filename, List<User> users,  String username, String password) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         String line;
         while ((line = reader.readLine()) != null) {

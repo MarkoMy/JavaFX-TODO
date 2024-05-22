@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
 public class User {
     private String username;
     private String password;
-    private List<Task> tasks;
+    private List<Task> tasks = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Constructs a new User with an empty task list.

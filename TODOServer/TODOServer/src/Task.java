@@ -1,8 +1,5 @@
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The Task class represents a task with various attributes such as title, description,
@@ -17,7 +14,7 @@ public class Task {
     private String status;
     private User author;
     private Group group;
-    private List<User> assignedUsers;
+    private List<User> assignedUsers = Collections.synchronizedList(new ArrayList<>());
     private List<EditHistory> editHistories;
 
     /**
@@ -39,7 +36,7 @@ public class Task {
      * @param priority the new priority of the task
      * @param status the new status of the task
      */
-    public void editTask(User user, String title, String description, LocalDateTime deadline, String priority, String status) {
+    public synchronized void editTask(User user, String title, String description, LocalDateTime deadline, String priority, String status) {
         this.title = title;
         this.description = description;
         this.deadline = deadline;
@@ -53,7 +50,7 @@ public class Task {
      *
      * @param group the group to share the task with
      */
-    public void shareTask(Group group) {
+    public synchronized void shareTask(Group group) {
         this.group = group;
         group.getTasks().add(this);
     }
@@ -61,7 +58,7 @@ public class Task {
     /**
      * Deletes the task by removing it from the author's and group's task lists.
      */
-    public void deleteTask() {
+    public synchronized void deleteTask() {
         this.author.getTasks().remove(this);
         this.group.getTasks().remove(this);
     }
